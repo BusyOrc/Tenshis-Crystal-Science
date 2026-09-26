@@ -126,26 +126,34 @@ public class EnergyComponent extends NetworkMachineComponent implements IAEPower
     }
 
     /**
-     * 把给定的 AE 能量按 AE2 官方换算比（默认 1 AE = 2 FE，可在 AE2 配置里改）主动推给一个 FE 接收方。
+     * 把自身存储的 AE 能量按 AE2 官方换算比（默认 1 AE = 2 FE，可在 AE2 配置里改）主动推给一个 FE 接收方。
      * <p>
-     * 这里推的是"还没进过自己缓存"的能量（例如刚发出来的电），因此不会碰自身存储；
-     * 先模拟目标能吃多少，再真正喂进去，最后把没能推出去的部分换回 AE 返回给调用方。
+     * 单次上限就是机器当时的全部电量：先按当前全部电量问目标能吃多少，再从自身抽取对应电量喂进去，
+     * 目标没吃下的部分原样退回自身缓存。
      *
-     * @param aeAmount 准备推出的 AE 能量
-     * @return 没能推出的剩余 AE 能量
+     * @return 实际推出去的 FE 数量
      */
-    public double pushEnergyTo(IEnergyStorage target, double aeAmount) {
-        if (aeAmount <= 0) return Math.max(0, aeAmount);
+    public int exportToFe(IEnergyStorage target) {
+        double available = getAECurrentPower();
+        if (available <= 0) return 0;
 
-        int feAmount = (int) Math.floor(PowerUnit.AE.convertTo(PowerUnit.FE, aeAmount));
-        if (feAmount <= 0) return aeAmount;
+        int feAmount = (int) Math.floor(PowerUnit.AE.convertTo(PowerUnit.FE, available));
+        if (feAmount <= 0) return 0;
 
+        // 先模拟目标能吃多少，再按它接受的量从自身抽取
         int accepted = target.receiveEnergy(feAmount, true);
-        if (accepted <= 0) return aeAmount;
+        if (accepted <= 0) return 0;
 
-        int given = target.receiveEnergy(accepted, false);
-        if (given <= 0) return aeAmount;
+        double extracted = extractAEPower(PowerUnit.FE.convertTo(PowerUnit.AE, accepted), Actionable.MODULATE);
+        int toSend = (int) Math.floor(PowerUnit.AE.convertTo(PowerUnit.FE, extracted));
+        if (toSend <= 0) return 0;
 
-        return Math.max(0, aeAmount - PowerUnit.FE.convertTo(PowerUnit.AE, given));
+        int given = target.receiveEnergy(toSend, false);
+
+        // 保底：目标实际没吃下的部分退回自身缓存
+        if (given < toSend) {
+            injectAEPower(PowerUnit.FE.convertTo(PowerUnit.AE, toSend - given), Actionable.MODULATE);
+        }
+        return given;
     }
 }

@@ -228,29 +228,28 @@ public class SideConfigComponent extends BaseMachineComponent {
 
         tickAppEngInv(level, pos);
         tickGenericInv(level, pos);
+        tickEnergy(level, pos);
     }
 
     /**
-     * 「主动弹出」时把给定的 AE 能量推给相邻的 FE 接收方。
+     * 「主动弹出」时把 AE 能量按 AE2 官方换算比（默认 1 AE = 2 FE）推给相邻的 FE 接收方。
      * <p>
      * 只有配置为输出的面（策略允许抽取）才会推，且只有本身能对外供电的机器（能量权限允许抽取，
      * 例如晶体谐振仓）才会推，用能机器不受影响。邻居没有 FE 接收能力时直接跳过。
-     * 推送速率不做额外限制：邻居能吃多少就推多少（与 FE 能力被抽时的行为一致）。
-     *
-     * @param aeAmount 准备推出的 AE 能量
-     * @return 没能推出的剩余 AE 能量
+     * <p>
+     * 单次上限就是机器当时的全部电量：每个输出面都会以"当前全部缓存"为上限询问邻居，
+     * 先把能推的推完，剩下的才留在自己身上。能量组件在组件列表中排在前面，
+     * 因此同一 tick 内总是先满足 AE 网络、再弹出给 FE 设备。
      */
-    public double pushEnergy(@Nullable Level level, @NotNull BlockPos pos, double aeAmount) {
-        if (level == null || level.isClientSide || !autoExport) return aeAmount;
-        if (aeAmount <= 0) return aeAmount;
-        if (container == null || !container.hasService(EnergyComponent.class)) return aeAmount;
+    private void tickEnergy(@NotNull Level level, @NotNull BlockPos pos) {
+        if (level.isClientSide || !autoExport) return;
+        if (container == null || !container.hasService(EnergyComponent.class)) return;
 
         EnergyComponent energy = container.getService(EnergyComponent.class);
-        if (!energy.getPowerFlow().isAllowExtraction()) return aeAmount;
+        if (!energy.getPowerFlow().isAllowExtraction()) return;
 
-        double remaining = aeAmount;
         for (var kv : policies.entrySet()) {
-            if (remaining <= 0) break;
+            if (energy.getAECurrentPower() <= 0) break;
 
             Direction dir = kv.getKey();
             if (!kv.getValue().allowExtract()) continue;
@@ -259,10 +258,8 @@ public class SideConfigComponent extends BaseMachineComponent {
                     pos.relative(dir), dir.getOpposite());
             if (target == null || !target.canReceive()) continue;
 
-            remaining = energy.pushEnergyTo(target, remaining);
+            energy.exportToFe(target);
         }
-
-        return remaining;
     }
 
     private void tickAppEngInv(@NotNull Level level, @NotNull BlockPos pos) {

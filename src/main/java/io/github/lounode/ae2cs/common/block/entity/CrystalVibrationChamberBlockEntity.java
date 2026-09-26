@@ -203,34 +203,21 @@ public class CrystalVibrationChamberBlockEntity extends AENetworkedSelfPoweredBl
     }
 
     /**
-     * 发电的去向顺序：AE 网络 → 面配置的「主动弹出」面（FE）→ 自身缓存
+     * 发电先去 AE 网络，网络吃不下才存进自身缓存。
+     * <p>
+     * 面配置的「主动弹出」由 {@link SideConfigComponent} 每 tick 统一处理：能量组件排在组件列表最前，
+     * 所以同一 tick 内永远是先满足 AE 网络，再按弹出面把（最多）全部电量推给相邻的 FE 设备，
+     * 没推出去的才留在自己身上。
      */
     private void outputGeneratedPower(double amount) {
         double remaining = amount;
-
-        // 1-优先注入AE网络
         IGrid grid = getMainNode().getGrid();
         if (grid != null) {
             remaining = grid.getEnergyService().injectPower(remaining, Actionable.MODULATE);
         }
-
-        // 2-其次按面配置的「主动弹出」推给相邻的FE设备（未开启主动弹出 / 邻居不收FE时原样返回）
-        if (remaining > 0) {
-            remaining = pushToNeighborFe(remaining);
-        }
-
-        // 3-最后才存进自身缓存
         if (remaining > 0) {
             injectAEPower(remaining, Actionable.MODULATE);
         }
-    }
-
-    private double pushToNeighborFe(double amount) {
-        if (level == null || level.isClientSide) return amount;
-        if (!getMachineComponents().hasService(SideConfigComponent.class)) return amount;
-
-        return getMachineComponents().getService(SideConfigComponent.class)
-                .pushEnergy(level, worldPosition, amount);
     }
 
     private void clearBurnState() {
