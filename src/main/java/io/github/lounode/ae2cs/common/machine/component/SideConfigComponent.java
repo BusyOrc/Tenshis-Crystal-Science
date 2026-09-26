@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import org.jetbrains.annotations.NotNull;
@@ -227,6 +228,41 @@ public class SideConfigComponent extends BaseMachineComponent {
 
         tickAppEngInv(level, pos);
         tickGenericInv(level, pos);
+    }
+
+    /**
+     * 「主动弹出」时把给定的 AE 能量推给相邻的 FE 接收方。
+     * <p>
+     * 只有配置为输出的面（策略允许抽取）才会推，且只有本身能对外供电的机器（能量权限允许抽取，
+     * 例如晶体谐振仓）才会推，用能机器不受影响。邻居没有 FE 接收能力时直接跳过。
+     * 推送速率不做额外限制：邻居能吃多少就推多少（与 FE 能力被抽时的行为一致）。
+     *
+     * @param aeAmount 准备推出的 AE 能量
+     * @return 没能推出的剩余 AE 能量
+     */
+    public double pushEnergy(@Nullable Level level, @NotNull BlockPos pos, double aeAmount) {
+        if (level == null || level.isClientSide || !autoExport) return aeAmount;
+        if (aeAmount <= 0) return aeAmount;
+        if (container == null || !container.hasService(EnergyComponent.class)) return aeAmount;
+
+        EnergyComponent energy = container.getService(EnergyComponent.class);
+        if (!energy.getPowerFlow().isAllowExtraction()) return aeAmount;
+
+        double remaining = aeAmount;
+        for (var kv : policies.entrySet()) {
+            if (remaining <= 0) break;
+
+            Direction dir = kv.getKey();
+            if (!kv.getValue().allowExtract()) continue;
+
+            IEnergyStorage target = level.getCapability(Capabilities.EnergyStorage.BLOCK,
+                    pos.relative(dir), dir.getOpposite());
+            if (target == null || !target.canReceive()) continue;
+
+            remaining = energy.pushEnergyTo(target, remaining);
+        }
+
+        return remaining;
     }
 
     private void tickAppEngInv(@NotNull Level level, @NotNull BlockPos pos) {
