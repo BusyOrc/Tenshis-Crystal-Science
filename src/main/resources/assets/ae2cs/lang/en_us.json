@@ -448,6 +448,10 @@
   "ae2cs.machine_settings.sound_mode.title": "Sound",
   "ae2cs.machine_settings.sound_mode.mute.desc": "Muted",
   "ae2cs.machine_settings.sound_mode.unmute.desc": "Normal",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.title": "Machine Mode",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.centrifuge": "Centrifuge",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.haunting": "Haunting",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.splashing": "Splashing",
 
   "ae2cs.button.side_config.tooltip": "%s\n%s",
 
@@ -475,6 +479,7 @@
 
   "ae2cs.integration.jei.recipe_category.circuit_etcher": "Circuit Etching",
   "ae2cs.integration.jei.recipe_category.energy_cost.tooltip": "Energy Cost: %s AE",
+    "ae2cs.integration.jei.recipe_category.chance.tooltip": "Chance: %s%%",
   "ae2cs.integration.jei.recipe_category.crystal_aggregator": "Crystal Aggregation",
   "ae2cs.integration.jei.recipe_category.crystal_infuser": "Crystal Infusion",
   "ae2cs.tooltip.fluid_amount": "Water: %s / %s mB",

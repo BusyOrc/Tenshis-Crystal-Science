@@ -25,4 +25,9 @@ public class AECSSettings {
     public static final Setting<AutoLinkCableMode> AUTO_LINK_CABLE_MODE = Settings.register("aecs_auto_link_cable_mode", AutoLinkCableMode.class);
 
     public static final Setting<SoundMode> SOUND_MODE = Settings.register("aecs_sound_mode", SoundMode.class);
+
+    /**
+     * 脉冲离心机的机器模式：离心 / 缠魂 / 洗涤
+     */
+    public static final Setting<PulseCentrifugeMode> PULSE_CENTRIFUGE_MODE = Settings.register("aecs_pulse_centrifuge_mode", PulseCentrifugeMode.class);
 }

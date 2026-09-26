@@ -3,11 +3,15 @@ package io.github.lounode.ae2cs.integration.emi;
 import io.github.lounode.ae2cs.common.init.AECSBlocks;
 import io.github.lounode.ae2cs.common.init.AECSItems;
 import io.github.lounode.ae2cs.common.init.AECSMenus;
+import io.github.lounode.ae2cs.api.ids.AECSConstants;
 import io.github.lounode.ae2cs.common.init.AECSRecipeTypes;
+import io.github.lounode.ae2cs.common.recipe.pulse_centrifuge.PulseCentrifugeCreateCompat;
 
 import appeng.recipes.entropy.EntropyRecipe;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.fml.ModList;
 
 import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
@@ -78,6 +82,15 @@ public class AECSEmiPlugin implements EmiPlugin {
                 .stream()
                 .map(PulseCentrifugeRecipeCategory::new)
                 .forEach(registry::addRecipe);
+
+        // 机械动力已加载时，把鼓风机（缠魂 / 洗涤）配方也一并展示，机器确实能执行它们
+        var level = Minecraft.getInstance().level;
+        if (level != null && ModList.get().isLoaded(AECSConstants.CREATE_ID)) {
+            PulseCentrifugeCreateCompat.collectDisplayRecipes(level)
+                    .stream()
+                    .map(PulseCentrifugeRecipeCategory::new)
+                    .forEach(registry::addRecipe);
+        }
 
         registry.addCategory(CrystalGrowthCategory.RECIPE_TYPE);
         registry.addWorkstation(CrystalGrowthCategory.RECIPE_TYPE, EmiStack.of(AECSBlocks.CRYSTAL_GROWTH_CHAMBER_BLOCK));

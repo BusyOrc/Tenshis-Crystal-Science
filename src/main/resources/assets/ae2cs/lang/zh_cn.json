@@ -448,6 +448,10 @@
   "ae2cs.machine_settings.sound_mode.title": "声音设置",
   "ae2cs.machine_settings.sound_mode.mute.desc": "静音",
   "ae2cs.machine_settings.sound_mode.unmute.desc": "正常",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.title": "机器模式",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.centrifuge": "离心",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.haunting": "缠魂",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.splashing": "洗涤",
 
   "ae2cs.button.side_config.tooltip": "%s\n%s",
 
@@ -475,6 +479,7 @@
 
   "ae2cs.integration.jei.recipe_category.circuit_etcher": "电路蚀刻",
   "ae2cs.integration.jei.recipe_category.energy_cost.tooltip": "需要能量：%sAE",
+    "ae2cs.integration.jei.recipe_category.chance.tooltip": "概率：%s%%",
   "ae2cs.integration.jei.recipe_category.crystal_aggregator": "晶能聚合",
   "ae2cs.integration.jei.recipe_category.crystal_infuser": "晶体注能",
   "ae2cs.tooltip.fluid_amount": "水：%s / %s mB",

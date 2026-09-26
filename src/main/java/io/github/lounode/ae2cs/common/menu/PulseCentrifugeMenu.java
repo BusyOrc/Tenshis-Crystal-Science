@@ -1,6 +1,8 @@
 package io.github.lounode.ae2cs.common.menu;
 
 import io.github.lounode.ae2cs.api.networking.FluidTankState;
+import io.github.lounode.ae2cs.api.settings.AECSSettings;
+import io.github.lounode.ae2cs.api.settings.PulseCentrifugeMode;
 import io.github.lounode.ae2cs.common.block.entity.PulseCentrifugeBlockEntity;
 import io.github.lounode.ae2cs.common.init.AECSMenus;
 
@@ -34,6 +36,9 @@ public class PulseCentrifugeMenu extends UpgradeableMenu<PulseCentrifugeBlockEnt
     public FluidTankState inputFluid = new FluidTankState(FluidStack.EMPTY, 16_000);
     @GuiSync(16)
     public FluidTankState outputFluid = new FluidTankState(FluidStack.EMPTY, 16_000);
+    /** 机器模式：离心 / 缠魂 / 洗涤 */
+    @GuiSync(17)
+    public PulseCentrifugeMode mode;
 
     public PulseCentrifugeMenu(int id, Inventory playerInventory, PulseCentrifugeBlockEntity host) {
         super(AECSMenus.PULSE_CENTRIFUGE_MENU.get(), id, playerInventory, host);
@@ -53,7 +58,9 @@ public class PulseCentrifugeMenu extends UpgradeableMenu<PulseCentrifugeBlockEnt
     }
 
     @Override
-    protected void loadSettingsFromHost(IConfigManager configManager) {}
+    protected void loadSettingsFromHost(IConfigManager configManager) {
+        this.mode = configManager.getSetting(AECSSettings.PULSE_CENTRIFUGE_MODE);
+    }
 
     public void sendFillFluidInputAction() {
         sendClientAction(FILL_FLUID_INPUT_ACTION);

@@ -1,6 +1,9 @@
 package io.github.lounode.ae2cs.client.gui;
 
+import io.github.lounode.ae2cs.api.settings.AECSSettings;
+import io.github.lounode.ae2cs.api.settings.PulseCentrifugeMode;
 import io.github.lounode.ae2cs.client.gui.subGUI.SideConfigGUI;
+import io.github.lounode.ae2cs.client.gui.widgets.AECSServerSettingToggleButton;
 import io.github.lounode.ae2cs.client.gui.widgets.AdvancedProgressBar;
 import io.github.lounode.ae2cs.client.gui.widgets.FluidTankWidget;
 import io.github.lounode.ae2cs.common.location.SimpleComponents;
@@ -20,6 +23,8 @@ public class PulseCentrifugeGUI extends UpgradeableScreen<PulseCentrifugeMenu> {
     private final AdvancedProgressBar workingProgressBar;
     private final FluidTankWidget inputFluidTank;
     private final FluidTankWidget outputFluidTank;
+    // 机器模式（离心 / 缠魂 / 洗涤）
+    private final AECSServerSettingToggleButton<PulseCentrifugeMode> modeButton;
 
     public PulseCentrifugeGUI(PulseCentrifugeMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title, StyleManager.loadStyleDoc("/screens/pulse_centrifuge_menu.json"));
@@ -59,6 +64,18 @@ public class PulseCentrifugeGUI extends UpgradeableScreen<PulseCentrifugeMenu> {
                 () -> getMenu().sendDrainFluidOutputAction());
 
         addToLeftToolbar(SideConfigGUI.iconButton());
+
+        // 机器模式切换，位于面配置按钮下方
+        modeButton = new AECSServerSettingToggleButton<>(AECSSettings.PULSE_CENTRIFUGE_MODE, PulseCentrifugeMode.CENTRIFUGE);
+        addToLeftToolbar(modeButton);
+    }
+
+    @Override
+    protected void updateBeforeRender() {
+        super.updateBeforeRender();
+        if (getMenu().mode != null) {
+            this.modeButton.set(getMenu().mode);
+        }
     }
 
     @Override

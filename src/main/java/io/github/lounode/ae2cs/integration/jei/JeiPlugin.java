@@ -16,6 +16,7 @@ import io.github.lounode.ae2cs.common.recipe.circuit_etcher.CircuitEtcherRecipe;
 import io.github.lounode.ae2cs.common.recipe.crystal_aggregator.CrystalAggregatorRecipe;
 import io.github.lounode.ae2cs.common.recipe.crystal_infuser.CrystalInfuserRecipe;
 import io.github.lounode.ae2cs.common.recipe.crystal_pulverizer.CrystalPulverizerRecipe;
+import io.github.lounode.ae2cs.common.recipe.pulse_centrifuge.PulseCentrifugeCreateCompat;
 import io.github.lounode.ae2cs.common.recipe.pulse_centrifuge.PulseCentrifugeRecipe;
 import io.github.lounode.ae2cs.integration.RecipeViewerNavigation;
 
@@ -39,6 +40,7 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import org.jetbrains.annotations.NotNull;
 import tamaized.ae2jeiintegration.integration.modules.jei.categories.EntropyManipulatorCategory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @mezz.jei.api.JeiPlugin
@@ -108,10 +110,13 @@ public class JeiPlugin implements IModPlugin {
         }
 
         {
-            List<RecipeHolder<PulseCentrifugeRecipe>> recipes = level.getRecipeManager()
-                    .getAllRecipesFor(AECSRecipeTypes.PULSE_CENTRIFUGE.get())
-                    .stream()
-                    .toList();
+            List<RecipeHolder<PulseCentrifugeRecipe>> recipes = new ArrayList<>(level.getRecipeManager()
+                    .getAllRecipesFor(AECSRecipeTypes.PULSE_CENTRIFUGE.get()));
+
+            // 机械动力已加载时，把鼓风机（缠魂 / 洗涤）配方也一并展示，机器确实能执行它们
+            if (ModList.get().isLoaded(AECSConstants.CREATE_ID)) {
+                recipes.addAll(PulseCentrifugeCreateCompat.collectDisplayRecipes(level));
+            }
 
             registration.addRecipes(PulseCentrifugeRecipeCategory.RECIPE_TYPE, recipes);
         }

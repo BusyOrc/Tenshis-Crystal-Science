@@ -1,6 +1,8 @@
 package io.github.lounode.ae2cs.datagen.builder.recipe;
 
 import io.github.lounode.ae2cs.AE2CrystalScience;
+import io.github.lounode.ae2cs.api.settings.PulseCentrifugeMode;
+import io.github.lounode.ae2cs.common.recipe.pulse_centrifuge.PulseCentrifugeOutput;
 import io.github.lounode.ae2cs.common.recipe.pulse_centrifuge.PulseCentrifugeRecipe;
 
 import net.minecraft.advancements.AdvancementRequirements;
@@ -18,6 +20,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,14 +32,16 @@ import java.util.Map;
 
 public class PulseCentrifugeRecipeBuilder implements RecipeBuilder {
 
-    private final List<ItemStack> results = new ArrayList<>(4);
+    private final List<PulseCentrifugeOutput> results = new ArrayList<>(4);
     private final int energyCost;
     private final Map<String, Criterion<?>> criteria = new LinkedHashMap<>();
     private @Nullable SizedIngredient input;
+    private @Nullable SizedFluidIngredient fluidInput;
     private FluidStack fluidOutput = FluidStack.EMPTY;
+    private PulseCentrifugeMode mode = PulseCentrifugeMode.CENTRIFUGE;
 
     private PulseCentrifugeRecipeBuilder(ItemStack result, int energyCost) {
-        this.results.add(result);
+        this.results.add(PulseCentrifugeOutput.of(result));
         this.energyCost = energyCost;
     }
 
@@ -68,10 +73,33 @@ public class PulseCentrifugeRecipeBuilder implements RecipeBuilder {
     }
 
     public PulseCentrifugeRecipeBuilder addResult(ItemStack result) {
+        return addResult(result, 1F);
+    }
+
+    /**
+     * 添加一个带概率的产物：chance 为 0~1，1 表示必定产出
+     */
+    public PulseCentrifugeRecipeBuilder addResult(ItemStack result, float chance) {
         if (results.size() >= 4) {
             throw new IllegalStateException("PulseCentrifugeRecipe supports at most 4 results");
         }
-        results.add(result);
+        results.add(PulseCentrifugeOutput.of(result, chance));
+        return this;
+    }
+
+    /**
+     * 配方的机器模式（离心 / 缠魂 / 洗涤），不设置时默认为离心
+     */
+    public PulseCentrifugeRecipeBuilder mode(PulseCentrifugeMode mode) {
+        this.mode = mode == null ? PulseCentrifugeMode.CENTRIFUGE : mode;
+        return this;
+    }
+
+    /**
+     * 配方要求的输入流体
+     */
+    public PulseCentrifugeRecipeBuilder fluidInput(SizedFluidIngredient fluidInput) {
+        this.fluidInput = fluidInput;
         return this;
     }
 
@@ -94,7 +122,7 @@ public class PulseCentrifugeRecipeBuilder implements RecipeBuilder {
 
     @Override
     public @NotNull Item getResult() {
-        return results.getFirst().getItem();
+        return results.getFirst().stack().getItem();
     }
 
     @Override
@@ -115,7 +143,7 @@ public class PulseCentrifugeRecipeBuilder implements RecipeBuilder {
             criteria.forEach(advancement::addCriterion);
         }
 
-        output.accept(id, new PulseCentrifugeRecipe(input, results, fluidOutput, energyCost),
+        output.accept(id, new PulseCentrifugeRecipe(input, results, fluidInput, fluidOutput, mode, energyCost),
                 advancement.build(id.withPrefix("recipes/")));
     }
 

@@ -4,6 +4,7 @@ import io.github.lounode.ae2cs.AE2CrystalScience;
 import io.github.lounode.ae2cs.client.gui.icon.AECSBlitter;
 import io.github.lounode.ae2cs.client.gui.widgets.AdvancedProgressBar;
 import io.github.lounode.ae2cs.common.init.AECSBlocks;
+import io.github.lounode.ae2cs.integration.RecipeViewerFluids;
 
 import appeng.menu.interfaces.IProgressProvider;
 import appeng.recipes.entropy.EntropyMode;
@@ -81,6 +82,8 @@ public class EntropyVariationReactionChamberRecipeCategory extends BasicEmiRecip
         inputFluid = recipe.getInput().fluid()
                 .map(EntropyRecipe.FluidInput::fluid)
                 .filter(fluid -> fluid != Fluids.EMPTY)
+                .map(RecipeViewerFluids::getDisplayFluid)
+                .filter(fluid -> fluid != Fluids.EMPTY)
                 .map(fluid -> EmiStack.of(fluid, getFluidInputAmount(recipe)))
                 .orElse(EmiStack.EMPTY);
         if (!inputBlock.isEmpty()) {
@@ -98,6 +101,8 @@ public class EntropyVariationReactionChamberRecipeCategory extends BasicEmiRecip
                 .ifPresent(outputStacks::add);
         outputFluid = recipe.getOutput().fluid()
                 .map(EntropyRecipe.FluidOutput::fluid)
+                .filter(fluid -> fluid != Fluids.EMPTY)
+                .map(RecipeViewerFluids::getDisplayFluid)
                 .filter(fluid -> fluid != Fluids.EMPTY)
                 .map(fluid -> EmiStack.of(fluid, 1000))
                 .orElse(EmiStack.EMPTY);

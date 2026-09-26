@@ -3,6 +3,7 @@ package io.github.lounode.ae2cs.api.settings;
 import io.github.lounode.ae2cs.client.gui.icon.AECSIcon;
 import io.github.lounode.ae2cs.client.gui.icon.AdaptedAE2Icon;
 import io.github.lounode.ae2cs.client.gui.icon.IButtonIcon;
+import io.github.lounode.ae2cs.common.init.AECSBlocks;
 
 import appeng.api.config.RedstoneMode;
 import appeng.api.config.Setting;
@@ -10,6 +11,7 @@ import appeng.recipes.entropy.EntropyMode;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 
 import org.jetbrains.annotations.NotNull;
@@ -110,6 +112,20 @@ public final class AECSSettingAppearances {
                 AECSSettings.SOUND_MODE, SoundMode.UNMUTE,
                 Component.translatable("ae2cs.machine_settings.sound_mode.title"),
                 Component.translatable("ae2cs.machine_settings.sound_mode.unmute.desc"));
+
+        // 脉冲离心机模式：用机器方块 / 灵魂沙 / 水桶作为图标
+        register(AECSBlocks.PULSE_CENTRIFUGE_BLOCK,
+                AECSSettings.PULSE_CENTRIFUGE_MODE, PulseCentrifugeMode.CENTRIFUGE,
+                Component.translatable("ae2cs.machine_settings.pulse_centrifuge_mode.title"),
+                Component.translatable("ae2cs.machine_settings.pulse_centrifuge_mode.centrifuge"));
+        register(Items.SOUL_SAND,
+                AECSSettings.PULSE_CENTRIFUGE_MODE, PulseCentrifugeMode.HAUNTING,
+                Component.translatable("ae2cs.machine_settings.pulse_centrifuge_mode.title"),
+                Component.translatable("ae2cs.machine_settings.pulse_centrifuge_mode.haunting"));
+        register(Items.WATER_BUCKET,
+                AECSSettings.PULSE_CENTRIFUGE_MODE, PulseCentrifugeMode.SPLASHING,
+                Component.translatable("ae2cs.machine_settings.pulse_centrifuge_mode.title"),
+                Component.translatable("ae2cs.machine_settings.pulse_centrifuge_mode.splashing"));
 
     }
 

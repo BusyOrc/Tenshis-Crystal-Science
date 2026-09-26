@@ -440,6 +440,10 @@
 "ae2cs.machine_settings.sound_mode.title": "サウンド",
 "ae2cs.machine_settings.sound_mode.mute.desc": "消音",
 "ae2cs.machine_settings.sound_mode.unmute.desc": "通常",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.title": "マシンモード",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.centrifuge": "遠心分離",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.haunting": "憑依",
+    "ae2cs.machine_settings.pulse_centrifuge_mode.splashing": "水洗",
 
 "ae2cs.button.side_config.tooltip": "%s\n%s",
 
@@ -467,6 +471,7 @@
 
 "ae2cs.integration.jei.recipe_category.circuit_etcher": "回路エッチング",
 "ae2cs.integration.jei.recipe_category.energy_cost.tooltip": "エネルギーコスト: %s AE",
+    "ae2cs.integration.jei.recipe_category.chance.tooltip": "確率: %s%%",
 "ae2cs.integration.jei.recipe_category.crystal_aggregator": "水晶集合",
 "ae2cs.integration.jei.recipe_category.crystal_infuser": "水晶注入",
 "ae2cs.tooltip.fluid_amount": "水: %s / %s mB",

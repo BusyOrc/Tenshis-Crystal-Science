@@ -4,6 +4,7 @@ import io.github.lounode.ae2cs.AE2CrystalScience;
 import io.github.lounode.ae2cs.client.gui.icon.AECSBlitter;
 import io.github.lounode.ae2cs.client.gui.widgets.AdvancedProgressBar;
 import io.github.lounode.ae2cs.common.init.AECSBlocks;
+import io.github.lounode.ae2cs.integration.RecipeViewerFluids;
 
 import appeng.menu.interfaces.IProgressProvider;
 import appeng.recipes.entropy.EntropyMode;
@@ -113,6 +114,8 @@ public class EntropyVariationReactionChamberRecipeCategory implements IRecipeCat
                           @NotNull IFocusGroup focuses) {
         var recipe = holder.value();
         recipe.getInput().fluid().map(EntropyRecipe.FluidInput::fluid).filter(fluid -> fluid != Fluids.EMPTY)
+                .map(RecipeViewerFluids::getDisplayFluid)
+                .filter(fluid -> fluid != Fluids.EMPTY)
                 .ifPresent(fluid -> builder.addInputSlot(1, 1).setFluidRenderer(16_000, true, 18, 60)
                         .addFluidStack(fluid, getFluidInputAmount(recipe)));
         recipe.getInput().block().ifPresent(block -> builder.addInputSlot(39, 22)
@@ -124,6 +127,8 @@ public class EntropyVariationReactionChamberRecipeCategory implements IRecipeCat
         recipe.getDrops().stream().limit(4 - itemOutputs.size()).forEach(itemOutputs::add);
 
         recipe.getOutput().fluid().map(EntropyRecipe.FluidOutput::fluid).filter(fluid -> fluid != Fluids.EMPTY)
+                .map(RecipeViewerFluids::getDisplayFluid)
+                .filter(fluid -> fluid != Fluids.EMPTY)
                 .ifPresent(fluid -> builder.addOutputSlot(143, 1).setFluidRenderer(16_000, true, 18, 60)
                         .addFluidStack(fluid, 1000));
 

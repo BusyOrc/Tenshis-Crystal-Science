@@ -1,5 +1,6 @@
 package io.github.lounode.ae2cs.common.recipe.pulse_centrifuge;
 
+import io.github.lounode.ae2cs.api.settings.PulseCentrifugeMode;
 import io.github.lounode.ae2cs.common.init.AECSRecipeSerializers;
 import io.github.lounode.ae2cs.common.init.AECSRecipeTypes;
 
@@ -12,27 +13,33 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class PulseCentrifugeRecipe implements Recipe<SingleRecipeInput> {
 
     private final SizedIngredient input;
-    private final List<ItemStack> results;
+    private final List<PulseCentrifugeOutput> results;
+    private final @Nullable SizedFluidIngredient fluidInput;
     private final FluidStack fluidOutput;
+    private final PulseCentrifugeMode mode;
     private final int energyCost;
 
-    public PulseCentrifugeRecipe(SizedIngredient input, List<ItemStack> results, int energyCost) {
-        this(input, results, FluidStack.EMPTY, energyCost);
+    public PulseCentrifugeRecipe(SizedIngredient input, List<PulseCentrifugeOutput> results, int energyCost) {
+        this(input, results, null, FluidStack.EMPTY, PulseCentrifugeMode.CENTRIFUGE, energyCost);
     }
 
-    public PulseCentrifugeRecipe(SizedIngredient input, List<ItemStack> results, FluidStack fluidOutput, int energyCost) {
+    public PulseCentrifugeRecipe(SizedIngredient input, List<PulseCentrifugeOutput> results,
+                                 @Nullable SizedFluidIngredient fluidInput, FluidStack fluidOutput,
+                                 PulseCentrifugeMode mode, int energyCost) {
         if (input.ingredient().isEmpty() || input.count() <= 0) {
             throw new IllegalArgumentException("Pulse centrifuge input cannot be empty");
         }
-        if (results.isEmpty() || results.size() > 4 || results.stream().anyMatch(ItemStack::isEmpty)) {
+        if (results.isEmpty() || results.size() > PulseCentrifugeProcess.MAX_RESULTS || results.stream().anyMatch(result -> result.stack().isEmpty())) {
             throw new IllegalArgumentException("Pulse centrifuge recipes require 1-4 non-empty results");
         }
         if (energyCost <= 0) {
@@ -40,8 +47,10 @@ public class PulseCentrifugeRecipe implements Recipe<SingleRecipeInput> {
         }
 
         this.input = input;
-        this.results = results.stream().map(ItemStack::copy).toList();
+        this.results = List.copyOf(results);
+        this.fluidInput = fluidInput;
         this.fluidOutput = fluidOutput == null ? FluidStack.EMPTY : fluidOutput.copy();
+        this.mode = mode == null ? PulseCentrifugeMode.CENTRIFUGE : mode;
         this.energyCost = energyCost;
     }
 
@@ -49,8 +58,22 @@ public class PulseCentrifugeRecipe implements Recipe<SingleRecipeInput> {
         return input;
     }
 
-    public List<ItemStack> results() {
-        return results.stream().map(ItemStack::copy).toList();
+    public List<PulseCentrifugeOutput> results() {
+        return results;
+    }
+
+    /**
+     * 配方所属的机器模式，未在数据包中填写时默认为离心
+     */
+    public PulseCentrifugeMode mode() {
+        return mode;
+    }
+
+    /**
+     * 配方要求的输入流体，可以为空
+     */
+    public @Nullable SizedFluidIngredient fluidInput() {
+        return fluidInput;
     }
 
     public FluidStack fluidOutput() {
@@ -69,7 +92,7 @@ public class PulseCentrifugeRecipe implements Recipe<SingleRecipeInput> {
     @Override
     public @NotNull ItemStack assemble(@NotNull SingleRecipeInput input,
                                        HolderLookup.@NotNull Provider registries) {
-        return results.getFirst().copy();
+        return results.getFirst().stack().copy();
     }
 
     @Override
@@ -79,7 +102,7 @@ public class PulseCentrifugeRecipe implements Recipe<SingleRecipeInput> {
 
     @Override
     public @NotNull ItemStack getResultItem(HolderLookup.@NotNull Provider registries) {
-        return results.getFirst().copy();
+        return results.getFirst().stack().copy();
     }
 
     @Override
