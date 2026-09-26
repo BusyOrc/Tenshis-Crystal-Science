@@ -269,5 +269,10 @@ public class AECSItemTagProvider extends ItemTagsProvider {
                 .addTag(AECSTags.Items.STORAGE_BLOCK_SILICON);
         tag(AECSTags.Items.STORAGE_BLOCK_SILICON)
                 .add(AECSBlocks.SILICON_BLOCK.asItem());
+
+        // 参考 AE2：母岩 / 晶芽 / 晶簇 的物品标签，内容与对应的方块标签一致
+        copy(Tags.Blocks.BUDDING_BLOCKS, Tags.Items.BUDDING_BLOCKS);
+        copy(Tags.Blocks.BUDS, Tags.Items.BUDS);
+        copy(Tags.Blocks.CLUSTERS, Tags.Items.CLUSTERS);
     }
 }

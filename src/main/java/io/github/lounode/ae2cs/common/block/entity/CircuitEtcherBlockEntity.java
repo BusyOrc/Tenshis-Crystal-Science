@@ -9,6 +9,7 @@ import io.github.lounode.ae2cs.common.init.AECSItems;
 import io.github.lounode.ae2cs.common.init.AECSRecipeTypes;
 import io.github.lounode.ae2cs.common.machine.component.AppEngInvComponent;
 import io.github.lounode.ae2cs.common.machine.component.InvPort;
+import io.github.lounode.ae2cs.common.machine.component.RecipeLockComponent;
 import io.github.lounode.ae2cs.common.machine.component.SideConfigComponent;
 import io.github.lounode.ae2cs.common.recipe.circuit_etcher.CircuitEtcherRecipe;
 import io.github.lounode.ae2cs.common.recipe.input.ThreeItemStackRecipeInput;
@@ -18,8 +19,10 @@ import appeng.api.config.Actionable;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.UpgradeInventories;
+import appeng.api.inventories.InternalInventory;
 import appeng.core.definitions.AEItems;
 import appeng.util.inv.AppEngInternalInventory;
+import appeng.util.inv.filter.IAEItemFilter;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -53,6 +56,11 @@ public class CircuitEtcherBlockEntity extends AENetworkedSelfPoweredBlockEntity 
      */
     private final IUpgradeInventory upgrades = UpgradeInventories.forMachine(AECSBlocks.CIRCUIT_ETCHER_BLOCK,
             4, this::onUpgradesChanged);
+
+    /**
+     * 配方锁定组件：记录并（可选择）锁定本机器执行过的配方
+     */
+    private final RecipeLockComponent recipeLock = new RecipeLockComponent();
 
     /**
      * 当前执行的配方
@@ -104,6 +112,14 @@ public class CircuitEtcherBlockEntity extends AENetworkedSelfPoweredBlockEntity 
                 setChanged();
             }
         };
+        // 配方锁定后，只有锁定配方所需的物品可以进入输入仓
+        inputInv.setFilter(new IAEItemFilter() {
+
+            @Override
+            public boolean allowInsert(InternalInventory inv, int slot, ItemStack stack) {
+                return isInputAllowedByRecipeLock(inv, stack);
+            }
+        });
         AppEngInternalInventory outputInv = new AppEngInternalInventory(1) {
 
             @Override
@@ -119,6 +135,88 @@ public class CircuitEtcherBlockEntity extends AENetworkedSelfPoweredBlockEntity 
         invComponent.addPort(InvPort.OUTPUT, outputInv);
         getMachineComponents().add(invComponent);
         getMachineComponents().add(new SideConfigComponent());
+        getMachineComponents().add(recipeLock);
+    }
+
+    public RecipeLockComponent getRecipeLock() {
+        return this.recipeLock;
+    }
+
+    public boolean isRecipeLockEnabled() {
+        return this.recipeLock.isEnabled();
+    }
+
+    public void setRecipeLockEnabled(boolean enabled) {
+        if (this.recipeLock.isEnabled() == enabled) {
+            return;
+        }
+
+        this.recipeLock.setEnabled(enabled);
+        // 开关改变后立刻重新评估配方：可能停下当前配方，或切换到已锁定的配方
+        this.needRefreshRecipeState = true;
+        setChanged();
+    }
+
+    /**
+     * 查询当前锁定的配方（锁定配方不存在时返回 null）
+     */
+    @Nullable
+    private CircuitEtcherRecipe getLockedRecipe() {
+        var level = getLevel();
+        var lockedId = this.recipeLock.getLockedRecipeId();
+        if (level == null || lockedId == null) {
+            return null;
+        }
+
+        var holder = level.getRecipeManager().byKey(lockedId);
+        if (holder.isPresent() && holder.get().value() instanceof CircuitEtcherRecipe recipe) {
+            return recipe;
+        }
+        return null;
+    }
+
+    /**
+     * 输入过滤：未锁定（或还未记录配方、锁定配方已失效）时不限制；
+     * 锁定后只放行锁定配方所需的物品，且单个物品的存量不超过一组
+     * （一组的数量取物品自身的堆叠上限，因此 64/16/4/1 叠物品都能正确工作；
+     * 若配方本身对同一物品的需求超过一组，则以配方需求为上限，避免原料永远凑不齐）。
+     */
+    private boolean isInputAllowedByRecipeLock(InternalInventory inv, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return true;
+        }
+        if (!this.recipeLock.hasLockedRecipe()) {
+            return true;
+        }
+
+        CircuitEtcherRecipe lockedRecipe = getLockedRecipe();
+        if (lockedRecipe == null) {
+            return true;
+        }
+
+        // 该物品是否属于锁定配方的原料（ingredient().test 天然兼容标签与组件匹配）
+        boolean matched = false;
+        int required = 0;
+        for (SizedIngredient ingredient : lockedRecipe.required()) {
+            if (ingredient.ingredient().test(stack)) {
+                matched = true;
+                required += ingredient.count();
+            }
+        }
+        if (!matched) {
+            return false;
+        }
+
+        int cap = Math.max(stack.getMaxStackSize(), required);
+        int existing = 0;
+        for (int i = 0; i < inv.size(); i++) {
+            ItemStack inSlot = inv.getStackInSlot(i);
+            if (!inSlot.isEmpty() && ItemStack.isSameItemSameComponents(inSlot, stack)) {
+                existing += inSlot.getCount();
+            }
+        }
+
+        return existing + stack.getCount() <= cap;
     }
 
     public AppEngInternalInventory getInputInv() {
@@ -248,13 +346,34 @@ public class CircuitEtcherBlockEntity extends AENetworkedSelfPoweredBlockEntity 
                 getInputInv().getStackInSlot(1),
                 getInputInv().getStackInSlot(2));
 
-        var opt = level.getRecipeManager().getRecipeFor(
-                AECSRecipeTypes.CIRCUIT_ETCHER.get(),
-                input,
-                level);
+        RecipeHolder<CircuitEtcherRecipe> holder = null;
+        int[] match = null;
+
+        if (this.recipeLock.hasLockedRecipe()) {
+            // 已锁定配方：只允许执行已记录的那个配方，即使存在其它可执行配方也不切换
+            var lockedId = this.recipeLock.getLockedRecipeId();
+            var locked = level.getRecipeManager().byKey(lockedId);
+            if (locked.isPresent() && locked.get().value() instanceof CircuitEtcherRecipe lockedRecipe) {
+                match = lockedRecipe.findMatch(input);
+                if (match != null) {
+                    @SuppressWarnings("unchecked")
+                    var lockedHolder = (RecipeHolder<CircuitEtcherRecipe>) locked.get();
+                    holder = lockedHolder;
+                }
+            }
+        } else {
+            var opt = level.getRecipeManager().getRecipeFor(
+                    AECSRecipeTypes.CIRCUIT_ETCHER.get(),
+                    input,
+                    level);
+            if (opt.isPresent()) {
+                holder = opt.get();
+                match = holder.value().findMatch(input);
+            }
+        }
 
         // 没有任何匹配配方：清空状态
-        if (opt.isEmpty()) {
+        if (holder == null || match == null) {
             activeRecipe = null;
             activeMatch = null;
             activeRecipeEnergyCost = 0;
@@ -262,18 +381,10 @@ public class CircuitEtcherBlockEntity extends AENetworkedSelfPoweredBlockEntity 
             return;
         }
 
-        var holder = opt.get();
         var recipe = holder.value();
 
-        int[] match = recipe.findMatch(input);
-        if (match == null) {
-            // 理论上不该发生（因为 getRecipeFor 已经匹配过），但保底
-            activeRecipe = null;
-            activeMatch = null;
-            activeRecipeEnergyCost = 0;
-            recipeProgress = 0;
-            return;
-        }
+        // 记录本次执行的配方（未开启锁定时也会记录；连续执行同一配方不会重复写盘）
+        this.recipeLock.recordExecutedRecipe(holder.id());
 
         // 配方未变：保持进度，仅刷新 match/time
         if (activeRecipe != null && activeRecipe.id().equals(holder.id())) {

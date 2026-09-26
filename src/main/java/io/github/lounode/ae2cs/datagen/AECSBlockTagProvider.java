@@ -1,9 +1,12 @@
 package io.github.lounode.ae2cs.datagen;
 
+import io.github.lounode.ae2cs.api.ids.AECSBlockIds;
 import io.github.lounode.ae2cs.api.ids.AECSConstants;
 import io.github.lounode.ae2cs.common.init.AECSBlocks;
 import io.github.lounode.ae2cs.common.init.AECSTags;
 import io.github.lounode.ae2cs.common.init.CrystalFamilyBlocks;
+
+import appeng.api.ids.AETags;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -163,5 +166,29 @@ public class AECSBlockTagProvider extends BlockTagsProvider {
         // 允许主世界洞穴生成覆盖这些方块
         tag(BlockTags.OVERWORLD_CARVER_REPLACEABLES)
                 .addTag(AECSTags.Blocks.ORES_CERTUS_QUARTZ);
+
+        // 参考 AE2 的水晶标签：母岩（= AE2 的萌芽块）、晶芽、晶簇
+        var buddingBlocks = tag(Tags.Blocks.BUDDING_BLOCKS);
+        var buds = tag(Tags.Blocks.BUDS);
+        var clusters = tag(Tags.Blocks.CLUSTERS);
+        var growthAcceleratable = tag(AETags.GROWTH_ACCELERATABLE);
+
+        for (var motherRock : AECSBlocks.getCrystalMotherRocks()) {
+            buddingBlocks.add(motherRock.get());
+            // AE2 的生长加速器会强制随机刻相邻的 ae2:growth_acceleratable 方块
+            // （该标签默认内容已包含 #c:budding_blocks，这里再显式加一次，保证母岩一定可被催生）
+            growthAcceleratable.add(motherRock.get());
+        }
+
+        for (CrystalFamilyBlocks family : AECSBlocks.getCrystalFamilies()) {
+            for (var stage : family.stages()) {
+                // 末段（crystal_cluster / mature_crystal_cluster）算晶簇，其余算晶芽
+                if (stage.getId().getPath().endsWith(AECSBlockIds.CRYSTAL_CLUSTER_SUFFIX)) {
+                    clusters.add(stage.get());
+                } else {
+                    buds.add(stage.get());
+                }
+            }
+        }
     }
 }

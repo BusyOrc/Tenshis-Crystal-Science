@@ -1,6 +1,6 @@
 {
   "gui.ae2cs.fluid.empty": "空",
-  "creativetab.ae2cs.items": "AE2：水晶科技",
+  "creativetab.ae2cs.items": "玉造魅须丸的水晶科技",
 
   "block.ae2cs.ender_quartz_block": "末影水晶块",
   "block.ae2cs.resonating_crystal_block": "谐振水晶块",
@@ -389,6 +389,7 @@
   "ae2cs.auto_mode.disabled": "禁用",
   "ae2cs.auto_mode.enabled": "启用",
   "ae2cs.menu.side_config.button.clear": "清空配置\n将所有面配置设置为禁用",
+    "ae2cs.menu.recipe_lock.button": "配方锁定\n锁定该机器的配方，锁定以后无法输入配方原料之外的物品和流体，也不会执行其他配方",
 
   "ae2cs.menu.quartz_oscillator_clock.text.count_down": "触发间隔时间（刻）：",
   "ae2cs.menu.quartz_oscillator_clock.text.pulse_width": "触发持续时间（刻）：",
@@ -508,7 +509,7 @@
   "ae2cs.menu.resonant_template_coding_terminal.processing_ingredient_transfer_mode.full_split_desc": "按 JEI/EMI 显示顺序排列材料，不合并重复材料",
   "ae2cs.menu.resonant_template_coding_terminal.hotkey_unbound": "未设置",
   "ae2cs.tooltip.click_to_view_recipes": "点击查看配方",
-  "key.categories.ae2cs": "AE2 水晶科技",
+  "key.categories.ae2cs": "玉造魅须丸的水晶科技",
   "key.ae2cs.toggle_resonant_template_coding_slot_mode": "切换谐振样板编码终端槽模式",
   "key.ae2.wireless_ae2cs_resonant_pattern_encoding_terminal": "打开无线谐振合成编码终端"
 }

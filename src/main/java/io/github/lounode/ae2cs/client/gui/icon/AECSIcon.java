@@ -11,6 +11,9 @@ public enum AECSIcon implements IButtonIcon {
     PULL_MODE_ON(0, 0),
     PULL_MODE_OFF(16, 0),
 
+    RECIPE_LOCK_UNLOCKED(32, 0),
+    RECIPE_LOCK_LOCKED(48, 0),
+
     ENTROPY_INCREASE(0, 16),
     ENTROPY_DECREASE(16, 16),
 

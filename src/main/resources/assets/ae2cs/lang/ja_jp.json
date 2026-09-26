@@ -1,5 +1,5 @@
 {
-  "creativetab.ae2cs.items": "AE2: Crystal Science",
+  "creativetab.ae2cs.items": "玉造魅須丸の水晶科学",
 
   "block.ae2cs.ender_quartz_block": "エンダークォーツブロック",
   "block.ae2cs.resonating_crystal_block": "共振水晶ブロック",
@@ -381,6 +381,7 @@
   "ae2cs.auto_mode.disabled": "無効",
   "ae2cs.auto_mode.enabled": "有効",
   "ae2cs.menu.side_config.button.clear": "設定をクリア\nすべての側面設定を「無効」にします",
+  "ae2cs.menu.recipe_lock.button": "レシピロック\nこのマシンのレシピをロックします。ロック中はそのレシピの材料以外のアイテムや流体を搬入できず、他のレシピも実行されません",
 
   "ae2cs.menu.quartz_oscillator_clock.text.count_down": "間隔 (ティック):",
   "ae2cs.menu.quartz_oscillator_clock.text.pulse_width": "パルス幅 (ティック):",
@@ -499,7 +500,7 @@
 "ae2cs.menu.resonant_template_coding_terminal.processing_ingredient_transfer_mode.full_split": "現在：材料を完全分割",
 "ae2cs.menu.resonant_template_coding_terminal.processing_ingredient_transfer_mode.full_split_desc": "JEI/EMI の表示順を保ち、重複する材料を統合しません",
 "ae2cs.menu.resonant_template_coding_terminal.hotkey_unbound": "未設定",
-"key.categories.ae2cs": "AE2 水晶科学",
+"key.categories.ae2cs": "玉造魅須丸の水晶科学",
 "key.ae2cs.toggle_resonant_template_coding_slot_mode": "共振パターンエンコード端末のスロットモード切替",
   "key.ae2.wireless_ae2cs_resonant_pattern_encoding_terminal": "ワイヤレス共振クラフトエンコード端末を開く",
   "ae2cs.tooltip.click_to_view_recipes": "クリックしてレシピを表示",

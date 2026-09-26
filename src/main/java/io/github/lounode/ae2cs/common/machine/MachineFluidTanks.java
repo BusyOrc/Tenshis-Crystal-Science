@@ -6,6 +6,10 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
+
 /** Separate recipe input and output tanks while exposing one conventional fluid capability. */
 public final class MachineFluidTanks implements IFluidHandler {
 
@@ -35,6 +39,14 @@ public final class MachineFluidTanks implements IFluidHandler {
 
     public FluidTank output() {
         return output;
+    }
+
+    /**
+     * 限制输入罐可以接受的流体（例如配方锁定后只允许锁定配方所需的流体）。
+     * 传入 null 表示不限制。
+     */
+    public void setInputFilter(@Nullable Predicate<FluidStack> filter) {
+        input.setValidator(filter == null ? stack -> true : filter);
     }
 
     public void writeToNbt(CompoundTag tag, HolderLookup.Provider registries) {

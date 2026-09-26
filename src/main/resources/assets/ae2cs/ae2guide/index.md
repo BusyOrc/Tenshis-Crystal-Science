@@ -1,12 +1,12 @@
 ---
 navigation:
-  title: Applied Energistics - Crystal Science
+  title: Misumaru's Crystal Science
   position: 220
 ---
 
-# Applied Energistics: Crystal Science (AECS)
+# Misumaru's Crystal Science (AECS)
 
-**AECS (Applied Energistics: Crystal Science)** is an addon mod based on *Applied Energistics 2*.
+**AECS (Misumaru's Crystal Science)** is an addon mod based on *Applied Energistics 2*.
 It brings back the classic AE2 concept of **Purified Crystals**, and builds an extended system around them to add more practical machines, automation capabilities, and ME wireless networking features.
 
 ---

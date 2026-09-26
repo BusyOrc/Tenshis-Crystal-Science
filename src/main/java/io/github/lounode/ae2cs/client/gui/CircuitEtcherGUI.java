@@ -1,6 +1,7 @@
 package io.github.lounode.ae2cs.client.gui;
 
 import io.github.lounode.ae2cs.client.gui.subGUI.SideConfigGUI;
+import io.github.lounode.ae2cs.client.gui.widgets.AECSRecipeLockButton;
 import io.github.lounode.ae2cs.client.gui.widgets.AdvancedProgressBar;
 import io.github.lounode.ae2cs.common.location.SimpleComponents;
 import io.github.lounode.ae2cs.common.menu.CircuitEtcherMenu;
@@ -20,6 +21,9 @@ public class CircuitEtcherGUI extends UpgradeableScreen<CircuitEtcherMenu> {
 
     // 工作进度条
     private final AdvancedProgressBar workingProgressBar;
+
+    // 配方锁定开关
+    private final AECSRecipeLockButton recipeLockButton;
 
     public CircuitEtcherGUI(CircuitEtcherMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title, StyleManager.loadStyleDoc("/screens/circuit_etcher_menu.json"));
@@ -54,5 +58,15 @@ public class CircuitEtcherGUI extends UpgradeableScreen<CircuitEtcherMenu> {
         widgets.add("workingProgressBar", this.workingProgressBar);
 
         addToLeftToolbar(SideConfigGUI.iconButton());
+
+        // 配方锁定开关，位于面配置按钮下方
+        this.recipeLockButton = new AECSRecipeLockButton(getMenu()::sendSetRecipeLock);
+        addToLeftToolbar(this.recipeLockButton);
+    }
+
+    @Override
+    protected void updateBeforeRender() {
+        super.updateBeforeRender();
+        this.recipeLockButton.syncFromMenu(getMenu().recipeLock);
     }
 }

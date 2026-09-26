@@ -2,6 +2,7 @@ package io.github.lounode.ae2cs.common.init;
 
 import io.github.lounode.ae2cs.api.ids.AECSConstants;
 import io.github.lounode.ae2cs.api.linker.broadcast.MemoryCardBandInfo;
+import io.github.lounode.ae2cs.api.networking.RecipeLockField;
 import io.github.lounode.ae2cs.api.networking.SideConfigField;
 import io.github.lounode.ae2cs.common.item.ResonatingMemoryCardStorage;
 import io.github.lounode.ae2cs.common.me.crafting.EncodedResonatingPattern;
@@ -78,6 +79,14 @@ public class AECSDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<SideConfigField>> SIDE_CONFIG_FOR_MEMORY_CARD = register("side_config_for_memory_card", b -> b
             .persistent(SideConfigField.CODEC)
             .networkSynchronized(SideConfigField.STREAM_CODEC)
+            .cacheEncoding());
+
+    /**
+     * 给内存卡记录机器的配方锁定状态与已锁定的配方
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<RecipeLockField>> RECIPE_LOCK_FOR_MEMORY_CARD = register("recipe_lock_for_memory_card", b -> b
+            .persistent(RecipeLockField.CODEC)
+            .networkSynchronized(RecipeLockField.STREAM_CODEC)
             .cacheEncoding());
 
     /**

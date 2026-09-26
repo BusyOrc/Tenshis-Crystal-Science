@@ -1,12 +1,12 @@
 ---
 navigation:
-  title: Applied Energistics - Crystal Science
+  title: 玉造魅須丸の水晶科学
   position: 220
 ---
 
-# Applied Energistics: Crystal Science (AECS)
+# 玉造魅須丸の水晶科学 (AECS)
 
-**AECS (Applied Energistics: Crystal Science)**は、*Applied Energistics 2*をベースにしたアドオンMODです。
+**AECS (玉造魅須丸の水晶科学)**は、*Applied Energistics 2*をベースにしたアドオンMODです。
 **精製水晶**という古典的なAE2の概念を復活させ、それらを中心とした拡張システムを構築して、
 より実用的な機械、自動化能力、ME無線ネットワーク機能を追加します。
 

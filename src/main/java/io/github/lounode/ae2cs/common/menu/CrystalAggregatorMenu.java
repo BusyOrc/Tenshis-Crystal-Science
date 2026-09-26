@@ -20,6 +20,7 @@ public class CrystalAggregatorMenu extends UpgradeableMenu<CrystalAggregatorBloc
 
     private static final String FILL_FLUID_INPUT_ACTION = "fill_fluid_input";
     private static final String DRAIN_FLUID_OUTPUT_ACTION = "drain_fluid_output";
+    private static final String SET_RECIPE_LOCK_ACTION = "set_recipe_lock";
 
     @GuiSync(10)
     public int recipeProgress;
@@ -39,10 +40,17 @@ public class CrystalAggregatorMenu extends UpgradeableMenu<CrystalAggregatorBloc
     @GuiSync(15)
     public FluidTankState outputFluid = new FluidTankState(FluidStack.EMPTY, 16_000);
 
+    /**
+     * 配方锁定开关状态（仅用于客户端按钮显示）
+     */
+    @GuiSync(16)
+    public boolean recipeLock;
+
     public CrystalAggregatorMenu(int id, Inventory ip, CrystalAggregatorBlockEntity host) {
         super(AECSMenus.CRYSTAL_AGGREGATOR_MENU.get(), id, ip, host);
         registerClientAction(FILL_FLUID_INPUT_ACTION, this::fillFluidInput);
         registerClientAction(DRAIN_FLUID_OUTPUT_ACTION, this::drainFluidOutput);
+        registerClientAction(SET_RECIPE_LOCK_ACTION, Boolean.class, this::setRecipeLock);
 
         AppEngInternalInventory inputInv = getHost().getInputInv();
         AppEngInternalInventory outputInv = getHost().getOutputInv();
@@ -83,12 +91,21 @@ public class CrystalAggregatorMenu extends UpgradeableMenu<CrystalAggregatorBloc
         if (result.isSuccess()) setCarried(result.getResult());
     }
 
+    public void sendSetRecipeLock(boolean enabled) {
+        sendClientAction(SET_RECIPE_LOCK_ACTION, enabled);
+    }
+
+    private void setRecipeLock(boolean enabled) {
+        getHost().setRecipeLockEnabled(enabled);
+    }
+
     @Override
     public void broadcastChanges() {
         recipeNeedTicks = getHost().getActiveRecipeEnergyCost();
         recipeProgress = getHost().getRecipeProgress();
         maxEnergy = getHost().getAEMaxPower();
         currentEnergy = getHost().getAECurrentPower();
+        recipeLock = getHost().isRecipeLockEnabled();
         inputFluid = new FluidTankState(getHost().getFluidTanks().input().getFluid(), getHost().getFluidTanks().input().getCapacity());
         outputFluid = new FluidTankState(getHost().getFluidTanks().output().getFluid(), getHost().getFluidTanks().output().getCapacity());
 

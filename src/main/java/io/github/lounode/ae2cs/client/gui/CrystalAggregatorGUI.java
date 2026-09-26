@@ -1,6 +1,7 @@
 package io.github.lounode.ae2cs.client.gui;
 
 import io.github.lounode.ae2cs.client.gui.subGUI.SideConfigGUI;
+import io.github.lounode.ae2cs.client.gui.widgets.AECSRecipeLockButton;
 import io.github.lounode.ae2cs.client.gui.widgets.AdvancedProgressBar;
 import io.github.lounode.ae2cs.client.gui.widgets.FluidTankWidget;
 import io.github.lounode.ae2cs.common.location.SimpleComponents;
@@ -21,6 +22,9 @@ public class CrystalAggregatorGUI extends UpgradeableScreen<CrystalAggregatorMen
 
     // 工作进度条
     private final AdvancedProgressBar workingProgressBar;
+
+    // 配方锁定开关
+    private final AECSRecipeLockButton recipeLockButton;
 
     public CrystalAggregatorGUI(CrystalAggregatorMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title, StyleManager.loadStyleDoc("/screens/crystal_aggregator_menu.json"));
@@ -60,5 +64,15 @@ public class CrystalAggregatorGUI extends UpgradeableScreen<CrystalAggregatorMen
                 () -> getMenu().sendDrainFluidOutputAction()));
 
         addToLeftToolbar(SideConfigGUI.iconButton());
+
+        // 配方锁定开关，位于面配置按钮下方
+        this.recipeLockButton = new AECSRecipeLockButton(getMenu()::sendSetRecipeLock);
+        addToLeftToolbar(this.recipeLockButton);
+    }
+
+    @Override
+    protected void updateBeforeRender() {
+        super.updateBeforeRender();
+        this.recipeLockButton.syncFromMenu(getMenu().recipeLock);
     }
 }
